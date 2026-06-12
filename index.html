@@ -1,363 +1,283 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bike Roar Rater - TFJS On-Device</title>
-    
-    <!-- Load TensorFlow.js -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
-    <!-- Load Teachable Machine Audio Extension (Handles complex FFT/Spectrogram math automatically) -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands@0.4.0/dist/speech-commands.min.js"></script>
-
-    <style>
-        :root {
-            --primary: #ff4500;
-            --secondary: #222;
-            --bg: #0a0a0a;
-            --text: #ffffff;
-            --accent: #00ff7f;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-            text-align: center;
-        }
-
-        .container {
-            background-color: var(--secondary);
-            padding: 2.5rem;
-            border-radius: 20px;
-            box-shadow: 0 15px 40px rgba(255, 69, 0, 0.15);
-            width: 90%;
-            max-width: 450px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* Top highlight bar */
-        .container::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 5px;
-            background: linear-gradient(90deg, var(--primary), var(--accent));
-        }
-
-        h1 { margin-top: 0; color: var(--primary); text-transform: uppercase; letter-spacing: 2px; }
-        p { color: #aaaaaa; font-size: 0.95rem; margin-bottom: 25px; }
-
-        #record-btn {
-            background: linear-gradient(145deg, #ff5722, #e63e00);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 90px; height: 90px;
-            font-size: 32px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 20px rgba(255, 69, 0, 0.4);
-            margin: 10px auto 25px auto;
-            display: flex; align-items: center; justify-content: center;
-        }
-
-        #record-btn:active { transform: scale(0.9); }
-        
-        #record-btn.recording {
-            background: #dc143c;
-            animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
-        }
-
-        @keyframes pulse-ring {
-            0% { box-shadow: 0 0 0 0 rgba(220, 20, 60, 0.7); }
-            70% { box-shadow: 0 0 0 25px rgba(220, 20, 60, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(220, 20, 60, 0); }
-        }
-
-        /* Progress Bar for the 5s capture */
-        .progress-container { width: 100%; height: 6px; background: #333; border-radius: 3px; margin-bottom: 15px; display: none; overflow: hidden; }
-        .progress-bar { height: 100%; width: 0%; background: var(--primary); transition: width 0.1s linear; }
-
-        .results { display: none; animation: slideUp 0.5s ease-out forwards; border-top: 1px solid #333; padding-top: 20px; }
-        
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .score-box { background: rgba(0,0,0,0.4); padding: 15px; border-radius: 12px; margin-bottom: 15px; }
-        .score-display { font-size: 4rem; font-weight: 900; color: var(--accent); margin: 0; line-height: 1; text-shadow: 0 0 15px rgba(0,255,127,0.3); }
-        .bonus-text { font-size: 0.8rem; color: #ffeb3b; margin-top: 5px; }
-
-        .bike-badge {
-            display: inline-block; padding: 6px 12px; border-radius: 6px;
-            background: #333; font-weight: bold; font-size: 1.1rem; margin: 10px 0;
-            border-left: 4px solid var(--primary);
-        }
-
-        .trash-talk {
-            font-size: 1.1rem; font-style: italic; background: rgba(255,255,255,0.05);
-            padding: 15px; border-radius: 8px; margin-top: 10px; border: 1px solid #444;
-        }
-
-        #status { color: #888; font-size: 0.9rem; font-weight: 500; height: 20px; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AstroBible – Your Biblical Sign & Saint</title>
+  <meta name="theme-color" content="#4a2e1e" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Lora:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Lora', serif;
+      background: #f5efe0;
+      color: #3b2b1f;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+    h1, h2, h3 { font-family: 'Cinzel', serif; color: #4a2e1e; }
+    h1 {
+      font-size: 2.5rem;
+      text-align: center;
+      margin-bottom: 0.5rem;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    }
+    .subtitle {
+      text-align: center;
+      font-style: italic;
+      margin-bottom: 2rem;
+      color: #6e5340;
+    }
+    .card {
+      background: #fdf8f1;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      width: 100%;
+      max-width: 500px;
+      border: 1px solid #d6c3a5;
+    }
+    .form-group { margin-bottom: 1.2rem; }
+    label { display: block; font-weight: 700; margin-bottom: 0.3rem; color: #4a2e1e; }
+    input, button {
+      width: 100%; padding: 0.8rem; border-radius: 8px;
+      border: 1px solid #c7a97f; font-family: inherit; font-size: 1rem; background: #fffaf5;
+      transition: all 0.2s;
+    }
+    input:focus { outline: none; border-color: #8b6b4a; box-shadow: 0 0 0 3px rgba(139,107,74,0.2); }
+    button {
+      background: #4a2e1e; color: #fdf8f1; font-weight: 700; letter-spacing: 0.5px;
+      cursor: pointer; margin-top: 1rem; border: none; text-transform: uppercase;
+    }
+    button:hover { background: #5e3e2b; }
+    button:disabled { background: #b8a38b; cursor: not-allowed; }
+    #result { display: none; margin-top: 2rem; animation: fadeIn 0.6s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .tribe-card { background: linear-gradient(135deg, #f9eed7, #efdebd); border: 2px solid #b48c4f; }
+    .tribe-emblem { font-size: 3rem; text-align: center; margin: 0.5rem 0; }
+    .gem-stone { display: inline-block; width: 16px; height: 16px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+    .saint-card { background: #f2e9dc; border-left: 6px solid #7b5e3b; }
+    .watch-card { background: #e8dbcb; border-left: 6px solid #5a463a; }
+    .life-card { background: #faf3e6; border-left: 6px solid #b48c4f; }
+    .verse { font-style: italic; margin: 0.8rem 0; padding-left: 1rem; border-left: 3px solid #b48c4f; }
+    .small-note { font-size: 0.85rem; color: #6e5340; margin-top: 0.5rem; }
+    .loader { text-align: center; padding: 2rem; }
+    .loader::after {
+      content: ''; display: inline-block; width: 30px; height: 30px;
+      border: 3px solid #d6c3a5; border-top-color: #4a2e1e; border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    footer { margin-top: 3rem; color: #8e7a64; font-size: 0.9rem; }
+    .life-section { margin-bottom: 1.5rem; }
+    .life-section h4 { font-family: 'Cinzel', serif; color: #5e3e2b; border-bottom: 1px dashed #d6c3a5; padding-bottom: 0.2rem; margin-bottom: 0.5rem; }
+    .god-wants { font-weight: 700; font-size: 1.1rem; color: #3b2b1f; margin-top: 1rem; padding: 0.8rem; background: #e8dbc8; border-radius: 12px; }
+  </style>
 </head>
 <body>
+  <h1>✝️ AstroBible</h1>
+  <p class="subtitle">Discover your biblical sign, your patron saint, and your birth‑watch</p>
 
-    <div class="container">
-        <h1>Roar Rater</h1>
-        <p>100% On-Device AI Architecture</p>
-        
-        <button id="record-btn">🎤</button>
-        
-        <div class="progress-container" id="progress-container">
-            <div class="progress-bar" id="progress-bar"></div>
-        </div>
-        
-        <div id="status">Tap mic to load AI and record</div>
+  <div class="card" id="inputCard">
+    <form id="userForm">
+      <div class="form-group"><label for="name">Your Name</label><input type="text" id="name" placeholder="e.g., Michael" required autocomplete="name" /></div>
+      <div class="form-group"><label for="dob">Date of Birth</label><input type="date" id="dob" required /></div>
+      <div class="form-group"><label for="tob">Time of Birth (optional)</label><input type="time" id="tob" /></div>
+      <button type="submit" id="submitBtn">Reveal My Sign & Saint</button>
+    </form>
+  </div>
 
-        <div class="results" id="results-card">
-            <div class="score-box">
-                <div style="font-size: 0.9rem; color:#aaa; text-transform:uppercase; letter-spacing:1px;">Final Roar Score</div>
-                <div class="score-display" id="roar-score">0</div>
-                <div class="bonus-text" id="bonus-text">+0 Character Bonus</div>
-            </div>
-            
-            <div><span class="bike-badge" id="bike-class">Analyzing...</span></div>
-            <div class="trash-talk" id="trash-talk-text"></div>
-        </div>
-    </div>
+  <div id="loader" class="loader" style="display:none;"></div>
 
-    <script>
-        // --- 1. CONFIGURATION ---
-        // REPLACE this URL with your own Teachable Machine Audio model link once you train it!
-        // Example: "https://teachablemachine.withgoogle.com/models/YOUR_MODEL_ID/"
-        const URL = "https://teachablemachine.withgoogle.com/models/placeholder/"; 
-        
-        const RECORD_DURATION_MS = 5000; // 5 seconds
-        
-        // Trash Talk Engine (Tamil-English)
-        const trashTalkTemplates = {
-            low: [
-                "Enna ba, mixer grinder sound kekuthu! 😂",
-                "TVS 50 ah idhu? Needs more throat! 🛵",
-                "Sathame illa... Cycle otlama ba? 🚲"
-            ],
-            medium: [
-                "Not bad, aana innum konjam raw power thevai! 🏍️",
-                "Decent ah irukku, but where is the bass man? 🤔",
-                "KTM Duke vibes, pulling out okay! 🔥"
-            ],
-            high: [
-                "Verithanam! Pure muscle! 💥",
-                "Therikkavidalama! That's a beast roaring! 🦁",
-                "Kaantha kural! Royal Enfield thozha! 👑"
-            ]
-        };
+  <div id="result">
+    <div class="card tribe-card" id="tribeCard"></div>
+    <div class="card saint-card" id="saintCard"></div>
+    <div class="card watch-card" id="watchCard"></div>
+    <div class="card life-card" id="lifeCard"></div>
+    <button onclick="window.location.reload()" style="background:transparent; color:#4a2e1e; border:2px solid #4a2e1e; background:white; margin-top:1rem;">Try Another</button>
+  </div>
 
-        // UI Elements
-        const recordBtn = document.getElementById('record-btn');
-        const statusText = document.getElementById('status');
-        const resultsCard = document.getElementById('results-card');
-        const roarScoreEl = document.getElementById('roar-score');
-        const bikeClassEl = document.getElementById('bike-class');
-        const trashTalkEl = document.getElementById('trash-talk-text');
-        const bonusTextEl = document.getElementById('bonus-text');
-        const progressContainer = document.getElementById('progress-container');
-        const progressBar = document.getElementById('progress-bar');
+  <footer><p>Built with free APIs · Hebcal · Bible‑API + offline saint calendar</p></footer>
 
-        // State Variables
-        let isRecording = false;
-        let recognizer;
-        let audioContext;
-        let analyser;
-        let microphone;
-        let maxVolume = 0;
-        let detectedClass = "Unknown";
-        let maxConfidence = 0;
-        let progressInterval;
+  <script>
+    // --- Static offline saint calendar (unchanged) ---
+    const saintCalendar = {
+      "01-01": "Solemnity of Mary, Mother of God","01-02": "St. Basil the Great & St. Gregory Nazianzen","01-03": "Most Holy Name of Jesus","01-04": "St. Elizabeth Ann Seton","01-05": "St. John Neumann","01-06": "Epiphany of the Lord","01-07": "St. Raymond of Penyafort","01-08": "St. Lawrence Giustiniani","01-09": "St. Adrian of Canterbury","01-10": "St. William of Bourges","01-11": "St. Theodosius the Cenobiarch","01-12": "St. Marguerite Bourgeoys","01-13": "St. Hilary of Poitiers","01-14": "St. Felix of Nola","01-15": "St. Paul the Hermit","01-16": "St. Berard and Companions","01-17": "St. Anthony the Abbot","01-18": "St. Margaret of Hungary","01-19": "St. Marius and Family","01-20": "St. Fabian & St. Sebastian","01-21": "St. Agnes","01-22": "St. Vincent of Saragossa","01-23": "St. Ildephonsus","01-24": "St. Francis de Sales","01-25": "Conversion of St. Paul","01-26": "Sts. Timothy & Titus","01-27": "St. Angela Merici","01-28": "St. Thomas Aquinas","01-29": "St. Gildas the Wise","01-30": "St. Martina","01-31": "St. John Bosco",
+      "02-01": "St. Brigid of Ireland","02-02": "Presentation of the Lord","02-03": "St. Blaise & St. Ansgar","02-04": "St. Joseph of Leonissa","02-05": "St. Agatha","02-06": "St. Paul Miki & Companions","02-07": "St. Colette","02-08": "St. Jerome Emiliani & St. Josephine Bakhita","02-09": "St. Apollonia","02-10": "St. Scholastica","02-11": "Our Lady of Lourdes","02-12": "St. Eulalia of Barcelona","02-13": "St. Catherine de Ricci","02-14": "Sts. Cyril & Methodius","02-15": "St. Claude La Colombière","02-16": "St. Gilbert of Sempringham","02-17": "Seven Holy Founders of the Servite Order","02-18": "St. Simon of Cyrene (tradition)","02-19": "St. Conrad of Piacenza","02-20": "Sts. Francisco & Jacinta Marto","02-21": "St. Peter Damian","02-22": "Chair of St. Peter","02-23": "St. Polycarp","02-24": "St. Matthias the Apostle","02-25": "St. Walburga","02-26": "St. Porphyry of Gaza","02-27": "St. Gabriel of Our Lady of Sorrows","02-28": "St. Romanus of Condat","02-29": "St. Oswald of Worcester (leap year)",
+      "03-01": "St. David of Wales","03-02": "St. Agnes of Bohemia","03-03": "St. Katharine Drexel","03-04": "St. Casimir","03-05": "St. John Joseph of the Cross","03-06": "St. Colette","03-07": "Sts. Perpetua & Felicity","03-08": "St. John of God","03-09": "St. Frances of Rome","03-10": "St. Dominic Savio","03-11": "St. Constantine","03-12": "St. Luigi Orione","03-13": "St. Leander of Seville","03-14": "St. Matilda","03-15": "St. Louise de Marillac","03-16": "St. Abraham of Kidunaia","03-17": "St. Patrick","03-18": "St. Cyril of Jerusalem","03-19": "St. Joseph, Spouse of the Blessed Virgin Mary","03-20": "St. Cuthbert","03-21": "St. Nicholas of Flüe","03-22": "St. Lea of Rome","03-23": "St. Turibius of Mogrovejo","03-24": "St. Gabriel the Archangel (traditionally)","03-25": "Annunciation of the Lord","03-26": "St. Margaret Clitherow","03-27": "St. John Damascene","03-28": "St. Guntram","03-29": "St. Ludovico of Casoria","03-30": "St. John Climacus","03-31": "St. Stephen of Mar Saba",
+      "04-01": "St. Hugh of Grenoble","04-02": "St. Francis of Paola","04-03": "St. Richard of Chichester","04-04": "St. Isidore of Seville","04-05": "St. Vincent Ferrer","04-06": "St. Crescentia Hoess","04-07": "St. John Baptist de La Salle","04-08": "St. Julie Billiart","04-09": "St. Mary of Cleopas","04-10": "St. Michael de Sanctis","04-11": "St. Stanislaus","04-12": "St. Teresa of Los Andes","04-13": "St. Martin I","04-14": "St. Lydwine of Schiedam","04-15": "St. Hunna","04-16": "St. Bernadette Soubirous","04-17": "St. Anicetus","04-18": "St. Apollonius the Apologist","04-19": "St. Leo IX","04-20": "St. Agnes of Montepulciano","04-21": "St. Anselm","04-22": "St. Soter and St. Caius","04-23": "St. George","04-24": "St. Fidelis of Sigmaringen","04-25": "St. Mark the Evangelist","04-26": "Our Lady of Good Counsel","04-27": "St. Zita","04-28": "St. Peter Chanel & St. Louis Mary de Montfort","04-29": "St. Catherine of Siena","04-30": "St. Pius V",
+      "05-01": "St. Joseph the Worker","05-02": "St. Athanasius","05-03": "Sts. Philip & James, Apostles","05-04": "St. Florian","05-05": "St. Angelus of Jerusalem","05-06": "St. Dominic Savio (alt.)","05-07": "St. Rose Venerini","05-08": "Our Lady of Luján","05-09": "St. Pachomius","05-10": "St. Damien of Molokai","05-11": "St. Ignatius of Laconi","05-12": "Sts. Nereus & Achilleus, St. Pancras","05-13": "Our Lady of Fatima","05-14": "St. Matthias the Apostle (alt.)","05-15": "St. Isidore the Farmer","05-16": "St. Margaret of Cortona","05-17": "St. Paschal Baylon","05-18": "St. John I","05-19": "St. Celestine V","05-20": "St. Bernardine of Siena","05-21": "St. Christopher Magallanes","05-22": "St. Rita of Cascia","05-23": "St. John Baptist de Rossi","05-24": "Mary Help of Christians","05-25": "St. Bede the Venerable, St. Gregory VII, St. Mary Magdalene de Pazzi","05-26": "St. Philip Neri","05-27": "St. Augustine of Canterbury","05-28": "St. Bernard of Menthon","05-29": "St. Maximin of Trier","05-30": "St. Joan of Arc","05-31": "Visitation of the Blessed Virgin Mary",
+      "06-01": "St. Justin Martyr","06-02": "Sts. Marcellinus & Peter","06-03": "St. Charles Lwanga & Companions","06-04": "St. Francis Caracciolo","06-05": "St. Boniface","06-06": "St. Norbert","06-07": "St. Robert of Newminster","06-08": "St. William of York","06-09": "St. Ephrem the Syrian","06-10": "St. Margaret of Scotland","06-11": "St. Barnabas the Apostle","06-12": "St. John of Sahagún","06-13": "St. Anthony of Padua","06-14": "St. Elisha the Prophet","06-15": "St. Vitus, St. Modestus & St. Crescentia","06-16": "St. Lutgardis","06-17": "St. Albert Chmielowski","06-18": "St. Elizabeth of Schönau","06-19": "St. Romuald","06-20": "St. Silverius","06-21": "St. Aloysius Gonzaga","06-22": "St. Paulinus of Nola, Sts. John Fisher & Thomas More","06-23": "St. Joseph Cafasso","06-24": "Nativity of St. John the Baptist","06-25": "St. William of Vercelli","06-26": "St. Josemaría Escrivá","06-27": "St. Cyril of Alexandria","06-28": "St. Irenaeus","06-29": "Sts. Peter & Paul, Apostles","06-30": "First Martyrs of the Church of Rome",
+      "07-01": "St. Junipero Serra","07-02": "St. Oliver Plunkett","07-03": "St. Thomas the Apostle","07-04": "St. Elizabeth of Portugal","07-05": "St. Anthony Mary Zaccaria","07-06": "St. Maria Goretti","07-07": "St. Palladius","07-08": "St. Kilian","07-09": "St. Augustine Zhao Rong & Companions","07-10": "St. Veronica Giuliani","07-11": "St. Benedict of Nursia","07-12": "St. John Gualbert","07-13": "St. Henry","07-14": "St. Camillus de Lellis","07-15": "St. Bonaventure","07-16": "Our Lady of Mount Carmel","07-17": "St. Alexis","07-18": "St. Camillus de Lellis (alt.)","07-19": "St. Macrina the Younger","07-20": "St. Apollinaris","07-21": "St. Lawrence of Brindisi","07-22": "St. Mary Magdalene","07-23": "St. Bridget of Sweden","07-24": "St. Sharbel Makhluf","07-25": "St. James the Greater","07-26": "Sts. Joachim & Anne","07-27": "St. Pantaleon","07-28": "St. Samson","07-29": "Sts. Martha, Mary, & Lazarus","07-30": "St. Peter Chrysologus","07-31": "St. Ignatius of Loyola",
+      "08-01": "St. Alphonsus Liguori","08-02": "St. Eusebius of Vercelli, St. Peter Julian Eymard","08-03": "St. Lydia of Thyatira","08-04": "St. John Vianney","08-05": "Dedication of the Basilica of St. Mary Major","08-06": "Transfiguration of the Lord","08-07": "St. Sixtus II & Companions, St. Cajetan","08-08": "St. Dominic","08-09": "St. Teresa Benedicta of the Cross (Edith Stein)","08-10": "St. Lawrence","08-11": "St. Clare of Assisi","08-12": "St. Jane Frances de Chantal","08-13": "Sts. Pontian & Hippolytus","08-14": "St. Maximilian Kolbe","08-15": "Assumption of the Blessed Virgin Mary","08-16": "St. Stephen of Hungary","08-17": "St. Joan of the Cross","08-18": "St. Helena","08-19": "St. John Eudes","08-20": "St. Bernard of Clairvaux","08-21": "St. Pius X","08-22": "Queenship of Mary","08-23": "St. Rose of Lima","08-24": "St. Bartholomew the Apostle","08-25": "St. Louis IX, St. Joseph Calasanz","08-26": "Our Lady of Częstochowa","08-27": "St. Monica","08-28": "St. Augustine of Hippo","08-29": "Martyrdom of St. John the Baptist","08-30": "St. Fiacre","08-31": "St. Raymond Nonnatus",
+      "09-01": "St. Giles","09-02": "St. Margaret of Castello","09-03": "St. Gregory the Great","09-04": "St. Rose of Viterbo","09-05": "St. Teresa of Calcutta (Mother Teresa)","09-06": "St. Zechariah the Prophet","09-07": "St. Cloud","09-08": "Nativity of the Blessed Virgin Mary","09-09": "St. Peter Claver","09-10": "St. Nicholas of Tolentino","09-11": "St. John Gabriel Perboyre","09-12": "Most Holy Name of Mary","09-13": "St. John Chrysostom","09-14": "Exaltation of the Holy Cross","09-15": "Our Lady of Sorrows","09-16": "Sts. Cornelius & Cyprian","09-17": "St. Robert Bellarmine","09-18": "St. Joseph of Cupertino","09-19": "St. Januarius","09-20": "St. Andrew Kim Taegon & Companions","09-21": "St. Matthew the Apostle","09-22": "St. Maurice","09-23": "St. Padre Pio of Pietrelcina","09-24": "Our Lady of Mercy","09-25": "St. Finbarr","09-26": "Sts. Cosmas & Damian","09-27": "St. Vincent de Paul","09-28": "St. Wenceslaus, St. Lawrence Ruiz & Companions","09-29": "Sts. Michael, Gabriel, Raphael, Archangels","09-30": "St. Jerome",
+      "10-01": "St. Thérèse of Lisieux","10-02": "Guardian Angels","10-03": "St. Francis Borgia","10-04": "St. Francis of Assisi","10-05": "St. Faustina Kowalska","10-06": "St. Bruno, St. Marie Rose Durocher","10-07": "Our Lady of the Rosary","10-08": "St. Simeon","10-09": "St. Denis & Companions, St. John Leonardi","10-10": "St. Francis Borgia (alt.)","10-11": "St. John XXIII","10-12": "Our Lady of the Pillar","10-13": "St. Edward the Confessor","10-14": "St. Callistus I","10-15": "St. Teresa of Avila","10-16": "St. Hedwig, St. Margaret Mary Alacoque","10-17": "St. Ignatius of Antioch","10-18": "St. Luke the Evangelist","10-19": "Sts. Isaac Jogues & Companions","10-20": "St. Paul of the Cross","10-21": "St. Hilarion","10-22": "St. John Paul II","10-23": "St. John of Capistrano","10-24": "St. Anthony Mary Claret","10-25": "St. Crispin & Crispinian","10-26": "St. Evaristus","10-27": "St. Frumentius","10-28": "Sts. Simon & Jude, Apostles","10-29": "St. Narcissus of Jerusalem","10-30": "St. Alphonsus Rodriguez","10-31": "All Hallows' Eve (vigil of All Saints)",
+      "11-01": "All Saints","11-02": "All Souls' Day","11-03": "St. Martin de Porres","11-04": "St. Charles Borromeo","11-05": "St. Elizabeth of Hungary (some calendars)","11-06": "St. Leonard of Noblac","11-07": "St. Willibrord","11-08": "St. Godfrey","11-09": "Dedication of the Lateran Basilica","11-10": "St. Leo the Great","11-11": "St. Martin of Tours","11-12": "St. Josaphat","11-13": "St. Frances Xavier Cabrini","11-14": "St. Lawrence O'Toole","11-15": "St. Albert the Great","11-16": "St. Margaret of Scotland, St. Gertrude the Great","11-17": "St. Elizabeth of Hungary","11-18": "St. Rose Philippine Duchesne, Dedication of the Basilicas of Sts. Peter & Paul","11-19": "St. Nerses the Gracious","11-20": "St. Edmund the Martyr","11-21": "Presentation of the Blessed Virgin Mary","11-22": "St. Cecilia","11-23": "St. Clement I, St. Columban","11-24": "St. Andrew Dung-Lac & Companions","11-25": "St. Catherine of Alexandria","11-26": "St. John Berchmans","11-27": "St. Francesco Antonio Fasani","11-28": "St. Catherine Labouré","11-29": "St. Saturninus","11-30": "St. Andrew the Apostle",
+      "12-01": "St. Edmund Campion","12-02": "St. Bibiana","12-03": "St. Francis Xavier","12-04": "St. John Damascene (alt.)","12-05": "St. Sabas","12-06": "St. Nicholas","12-07": "St. Ambrose","12-08": "Immaculate Conception of the Blessed Virgin Mary","12-09": "St. Juan Diego","12-10": "Our Lady of Loreto","12-11": "St. Damasus I","12-12": "Our Lady of Guadalupe","12-13": "St. Lucy","12-14": "St. John of the Cross","12-15": "St. Mary Di Rosa","12-16": "St. Adelaide","12-17": "St. Lazarus","12-18": "St. Flannan","12-19": "St. Urban V","12-20": "St. Dominic of Silos","12-21": "St. Peter Canisius","12-22": "St. Chaeremon","12-23": "St. John of Kanty","12-24": "Christmas Eve (Vigil of Christmas)","12-25": "Nativity of the Lord (Christmas)","12-26": "St. Stephen, First Martyr","12-27": "St. John the Evangelist","12-28": "Holy Innocents","12-29": "St. Thomas Becket","12-30": "Holy Family","12-31": "St. Sylvester I"
+    };
 
-        // --- 2. TFJS MODEL LOADING ---
-        async function createModel() {
-            const checkpointURL = URL + "model.json"; // model topology
-            const metadataURL = URL + "metadata.json"; // model metadata
+    // Tribe mapping (unchanged)
+    const tribeMap = {
+      'Nisan': { tribe: 'Judah', stone: 'Ruby (Odem)', emblem: '🦁 Lion', blessing: 'The scepter shall not depart from Judah (Gen 49:10)', color: '#E0115F' },
+      'Iyar': { tribe: 'Issachar', stone: 'Topaz (Pitdah)', emblem: '☀️🌙 Sun & Moon', blessing: 'Issachar is a strong donkey, couching between the sheepfolds (Gen 49:14)', color: '#FFC87C' },
+      'Sivan': { tribe: 'Zebulun', stone: 'Carbuncle (Bareket)', emblem: '⛵ Ship', blessing: 'Zebulun shall dwell at the shore of the sea (Gen 49:13)', color: '#E34234' },
+      'Tammuz': { tribe: 'Reuben', stone: 'Emerald (Nofek)', emblem: '💧 Mandrakes', blessing: 'Reuben, you are my firstborn, my might (Gen 49:3)', color: '#50C878' },
+      'Av': { tribe: 'Simeon', stone: 'Sapphire (Sapir)', emblem: '⚔️ Sword', blessing: 'Simeon and Levi are brothers; weapons of violence are their swords (Gen 49:5)', color: '#0F52BA' },
+      'Elul': { tribe: 'Gad', stone: 'Diamond (Yahalom)', emblem: '🛡️ Troop', blessing: 'Gad, a troop shall tramp upon him, but he shall triumph at last (Gen 49:19)', color: '#E5E4E2' },
+      'Tishrei': { tribe: 'Ephraim', stone: 'Jacinth (Leshem)', emblem: '🐂 Bull', blessing: 'His glory is like the firstling of his bullock (Deut 33:17)', color: '#FF8C00' },
+      'Cheshvan': { tribe: 'Manasseh', stone: 'Agate (Shevo)', emblem: '🌴 Palm', blessing: 'Blessed of the LORD be his land (Deut 33:13)', color: '#A9A9A9' },
+      'Kislev': { tribe: 'Benjamin', stone: 'Amethyst (Ahlamah)', emblem: '🐺 Wolf', blessing: 'Benjamin is a ravenous wolf (Gen 49:27)', color: '#9966CC' },
+      'Tevet': { tribe: 'Dan', stone: 'Beryl (Tarshish)', emblem: '🐍 Serpent', blessing: 'Dan shall judge his people (Gen 49:16)', color: '#00BFFF' },
+      'Shevat': { tribe: 'Asher', stone: 'Onyx (Shoham)', emblem: '🫒 Olive Tree', blessing: 'Out of Asher his bread shall be fat (Gen 49:20)', color: '#353839' },
+      'Adar': { tribe: 'Naphtali', stone: 'Jasper (Yashpeh)', emblem: '🦌 Hind', blessing: 'Naphtali is a hind let loose (Gen 49:21)', color: '#D73B3E' }
+    };
+    function getTribeData(hebrewMonth) {
+      if (hebrewMonth.startsWith('Adar')) return tribeMap['Adar'];
+      return tribeMap[hebrewMonth] || null;
+    }
+    const nameSaintMap = {
+      'michael': 'St. Michael the Archangel', 'gabriel': 'St. Gabriel the Archangel', 'raphael': 'St. Raphael the Archangel',
+      'mary': 'Blessed Virgin Mary', 'joseph': 'St. Joseph', 'john': 'St. John the Evangelist',
+      'peter': 'St. Peter', 'paul': 'St. Paul', 'claire': 'St. Clare of Assisi', 'francis': 'St. Francis of Assisi',
+      'theresa': 'St. Thérèse of Lisieux', 'anthony': 'St. Anthony of Padua', 'catherine': 'St. Catherine of Siena',
+      'elizabeth': 'St. Elizabeth of Hungary', 'thomas': 'St. Thomas Aquinas', 'patrick': 'St. Patrick', 'joan': 'St. Joan of Arc'
+    };
+    function getWatchData(hour) {
+      if (hour >= 18 && hour < 21) return { watch: 'Evening Watch', time: '18:00–21:00', event: 'Last Supper', saint: 'St. John the Evangelist', verse: 'John 13:34', verseText: '' };
+      if (hour >= 21 || hour < 0) return { watch: 'Midnight Watch', time: '21:00–00:00', event: 'Agony in the Garden', saint: 'St. Gabriel (strength)', verse: 'Matthew 26:39', verseText: '' };
+      if (hour >= 0 && hour < 3) return { watch: 'Cockcrow Watch', time: '00:00–03:00', event: "Peter's Denial", saint: 'St. Peter', verse: 'Mark 14:72', verseText: '' };
+      if (hour >= 3 && hour < 6) return { watch: 'Morning Watch', time: '03:00–06:00', event: 'Women at the Tomb', saint: 'St. Mary Magdalene', verse: 'Matthew 28:1', verseText: '' };
+      return { watch: 'Day Watch', time: '06:00–18:00', event: 'Daytime Psalms', saint: 'Guardian Angel', verse: 'Psalm 118:24', verseText: '' };
+    }
+    async function fetchWithProxy(url) {
+      try {
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error('Direct fetch failed');
+        return await resp.json();
+      } catch (e) {
+        const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+        const resp = await fetch(proxyUrl);
+        if (!resp.ok) throw new Error('Proxy fetch failed');
+        return await resp.json();
+      }
+    }
+    async function getVerseText(reference) {
+      try {
+        const resp = await fetch(`https://bible-api.com/${encodeURIComponent(reference)}?translation=kjv`);
+        const data = await resp.json();
+        return data.text || '';
+      } catch { return ''; }
+    }
+    function generateLifeSections(tribeName, saintName, watchData, name) {
+      const sections = [
+        { area: "1. Spiritual Life", message: `Like the tribe of ${tribeName}, God calls you to root your faith deeply in prayer. Your patron, ${saintName}, intercedes for you. Let your daily watch (${watchData.watch}) remind you that every hour is sacred.` },
+        { area: "2. Relationships & Family", message: `The blessing of ${tribeName} flows into your home. God desires you to nurture love, forgiveness, and loyalty — as ${saintName} lived in charity. Let the meal of the Last Supper (if you were born in the Evening Watch) or the women at the tomb inspire you to serve your loved ones.` },
+        { area: "3. Vocation & Work", message: `The talent of the tribe of ${tribeName} was given for a purpose. ${saintName} found their calling; you are called to use your gifts in service. Whatever your hands find to do, do it for the Lord (Col 3:23).` },
+        { area: "4. Health & Well‑being", message: `Honor your body as a temple of the Holy Spirit. ${saintName} often practiced fasting and self‑care as a path to holiness. The rhythm of the watches teaches balance — rest in the Lord and rise to meet each day.` },
+        { area: "5. Community & Service", message: `The tribe of ${tribeName} was part of a larger people. God calls you beyond yourself — to serve the poor, the stranger, the Church. ${saintName} is proof that one life given to God can change the world.` }
+      ];
+      return sections;
+    }
+    function generateGodsWillSummary(tribeName, saintName, watchData, name) {
+      return `God wants you, ${name || 'beloved'}, to walk in the strength of ${tribeName}, with the companionship of ${saintName}, and the prayerful spirit of the ${watchData.watch}. Love mercy, act justly, and walk humbly with your God (Micah 6:8).`;
+    }
 
-            try {
-                const recognizer = speechCommands.create(
-                    "BROWSER_FFT", // Fourier transform type
-                    undefined,     // speech commands vocabulary feature
-                    checkpointURL,
-                    metadataURL
-                );
-                // check that model and metadata are loaded
-                await recognizer.ensureModelLoaded();
-                return recognizer;
-            } catch (e) {
-                console.warn("Real TFJS model not found. Falling back to Mock Engine for UI testing.");
-                return null; // Return null to trigger the graceful fallback demo
-            }
-        }
+    // --- Main action (unchanged) ---
+    document.getElementById('userForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('name').value.trim();
+      const dob = document.getElementById('dob').value;
+      const tob = document.getElementById('tob').value;
 
-        // --- 3. CORE LOGIC ---
-        recordBtn.addEventListener('click', async () => {
-            if (isRecording) return;
-            
-            resultsCard.style.display = 'none';
-            statusText.innerText = 'Loading TFJS Model into memory...';
-            
-            // Lazy load model on first click
-            if (!recognizer && recognizer !== null) {
-                recognizer = await createModel();
-            }
+      const submitBtn = document.getElementById('submitBtn');
+      const loader = document.getElementById('loader');
+      const resultDiv = document.getElementById('result');
+      const inputCard = document.getElementById('inputCard');
 
-            startPipeline();
+      submitBtn.disabled = true;
+      loader.style.display = 'block';
+      resultDiv.style.display = 'none';
+
+      try {
+        const [year, month, day] = dob.split('-');
+        const hebcalUrl = `https://www.hebcal.com/converter?cfg=json&gy=${year}&gm=${month}&gd=${day}&g2h=1`;
+        const hebData = await (await fetch(hebcalUrl)).json();
+        const hebrewMonth = hebData.hm;
+        const tribeInfo = getTribeData(hebrewMonth);
+        if (!tribeInfo) throw new Error('Could not determine biblical sign.');
+
+        // Saint: try API, then offline
+        let saintOfDay = null;
+        const dateKey = `${month}-${day}`;
+        const offlineSaint = saintCalendar[dateKey] || null;
+        const calapiUrl = `http://calapi.inadiutorium.cz/api/v0/en/calendars/general-en/${year}/${month}/${day}`;
+        try {
+          const calData = await fetchWithProxy(calapiUrl);
+          if (calData.celebrations && calData.celebrations.length > 0) {
+            saintOfDay = calData.celebrations[0].title;
+          }
+        } catch (apiErr) { console.warn('Calapi not available, using offline calendar.'); }
+        if (!saintOfDay) saintOfDay = offlineSaint || 'Unknown saint';
+
+        // Name saint
+        const nameKey = name.toLowerCase().split(' ')[0];
+        const nameSaint = nameSaintMap[nameKey] || null;
+
+        // Birth watch
+        let watchHour = 0;
+        if (tob) {
+          const [h, m] = tob.split(':').map(Number);
+          watchHour = h + (m / 60);
+        } else { watchHour = 12; }
+        const watchData = getWatchData(Math.floor(watchHour));
+        const verseText = await getVerseText(watchData.verse);
+        watchData.verseText = verseText;
+
+        // Build UI
+        document.getElementById('tribeCard').innerHTML = `
+          <h3>🐑 Your Biblical Sign</h3>
+          <div class="tribe-emblem">${tribeInfo.emblem}</div>
+          <p><strong>Tribe of ${tribeInfo.tribe}</strong> (Month: ${hebrewMonth})</p>
+          <p><span class="gem-stone" style="background:${tribeInfo.color};"></span> Gemstone: ${tribeInfo.stone}</p>
+          <p class="verse">“${tribeInfo.blessing}”</p>
+        `;
+        let saintHtml = `<h3>🕊️ Your Patron Saint</h3><p><strong>Birthday Saint:</strong> ${saintOfDay}</p>`;
+        if (nameSaint) saintHtml += `<p><strong>Name Saint:</strong> ${nameSaint}</p>`;
+        else saintHtml += `<p class="small-note">No specific name‑saint found. Your birthday saint is your special patron!</p>`;
+        document.getElementById('saintCard').innerHTML = saintHtml;
+        document.getElementById('watchCard').innerHTML = `
+          <h3>⏳ Your Birth Watch</h3>
+          <p><strong>${watchData.watch}</strong> (${watchData.time})</p>
+          <p>${watchData.event} – Patron: ${watchData.saint}</p>
+          <p class="verse">${watchData.verse}: "${watchData.verseText || '...'}"</p>
+        `;
+        const lifeSections = generateLifeSections(tribeInfo.tribe, saintOfDay, watchData, name);
+        const godsWill = generateGodsWillSummary(tribeInfo.tribe, saintOfDay, watchData, name);
+        let lifeHtml = `<h3>🌿 5 Sections of Life & What God Wants From You</h3>`;
+        lifeSections.forEach(section => {
+          lifeHtml += `<div class="life-section"><h4>${section.area}</h4><p>${section.message}</p></div>`;
         });
+        lifeHtml += `<div class="god-wants">✨ <strong>What God wants from you:</strong> ${godsWill}</div>`;
+        document.getElementById('lifeCard').innerHTML = lifeHtml;
 
-        async function startPipeline() {
-            try {
-                // Request raw microphone access for decibel calculation
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                setupDecibelTracker(stream);
+        inputCard.style.display = 'none';
+        resultDiv.style.display = 'block';
+        loader.style.display = 'none';
 
-                isRecording = true;
-                recordBtn.classList.add('recording');
-                progressContainer.style.display = 'block';
-                progressBar.style.width = '0%';
-                statusText.innerText = 'Listening... Rev the engine!';
-
-                // Start Progress Bar
-                let elapsed = 0;
-                progressInterval = setInterval(() => {
-                    elapsed += 100;
-                    progressBar.style.width = (elapsed / RECORD_DURATION_MS) * 100 + '%';
-                }, 100);
-
-                // If real TFJS model loaded, start classifying in real time
-                if (recognizer) {
-                    const classLabels = recognizer.wordLabels(); 
-                    recognizer.listen(result => {
-                        // Find highest confidence class during this window
-                        let scores = result.scores;
-                        let highestIndex = scores.indexOf(Math.max(...scores));
-                        
-                        if (scores[highestIndex] > maxConfidence) {
-                            maxConfidence = scores[highestIndex];
-                            detectedClass = classLabels[highestIndex];
-                        }
-                    }, {
-                        includeSpectrogram: false,
-                        probabilityThreshold: 0.75,
-                        invokeCallbackOnNoiseAndUnknown: true,
-                        overlapFactor: 0.50
-                    });
-                }
-
-                // Stop after 5 seconds
-                setTimeout(() => {
-                    stopPipeline(stream);
-                }, RECORD_DURATION_MS);
-
-            } catch (err) {
-                console.error(err);
-                statusText.innerText = "Error: Microphone permission denied.";
-            }
-        }
-
-        function setupDecibelTracker(stream) {
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            analyser = audioContext.createAnalyser();
-            microphone = audioContext.createMediaStreamSource(stream);
-            microphone.connect(analyser);
-            analyser.fftSize = 256;
-            
-            const bufferLength = analyser.frequencyBinCount;
-            const dataArray = new Uint8Array(bufferLength);
-            maxVolume = 0;
-
-            function track() {
-                if (!isRecording) return;
-                analyser.getByteFrequencyData(dataArray);
-                let sum = 0;
-                for (let i = 0; i < bufferLength; i++) { sum += dataArray[i]; }
-                let avg = sum / bufferLength;
-                if (avg > maxVolume) maxVolume = avg; // Track peak volume
-                requestAnimationFrame(track);
-            }
-            track();
-        }
-
-        function stopPipeline(stream) {
-            isRecording = false;
-            clearInterval(progressInterval);
-            recordBtn.classList.remove('recording');
-            progressContainer.style.display = 'none';
-            statusText.innerText = 'Processing completely on-device...';
-
-            // Clean up Audio Context
-            stream.getTracks().forEach(track => track.stop());
-            if (audioContext && audioContext.state !== 'closed') {
-                audioContext.close();
-            }
-            if (recognizer) {
-                recognizer.stopListening();
-            }
-
-            calculateAndShowResults();
-        }
-
-        function calculateAndShowResults() {
-            // 1. Calculate Base Decibel Score (Mapping peak volume 0-255 to 0-85)
-            let baseScore = Math.min(85, Math.round((maxVolume / 255) * 85 * 1.5)); 
-            if (baseScore < 10) baseScore = Math.floor(Math.random() * 20) + 10; 
-
-            // 2. Handle AI Bike Classification & Character Bonus
-            let characterBonus = 0;
-
-            // If the user hasn't put in their real Teachable Machine URL yet, Mock the AI
-            if (!recognizer) {
-                if (baseScore > 75) { detectedClass = "Royal Enfield Classic 350"; maxConfidence = 0.92; }
-                else if (baseScore > 50) { detectedClass = "KTM Duke 390"; maxConfidence = 0.85; }
-                else { detectedClass = "TVS XL Super"; maxConfidence = 0.78; }
-            }
-
-            // Assign Bonus based on AI Output (The "Character" Bonus from your architecture)
-            if (detectedClass.includes("Royal Enfield")) characterBonus = 15;
-            else if (detectedClass.includes("KTM")) characterBonus = 10;
-            else if (detectedClass.includes("Yamaha")) characterBonus = 8;
-            else characterBonus = 2; // Commuter bikes get low bonus
-
-            // 3. Final Roar Score Calculation
-            let finalScore = Math.min(100, baseScore + characterBonus);
-
-            // 4. Update UI
-            roarScoreEl.innerText = finalScore;
-            bonusTextEl.innerText = `+${characterBonus} Character Bonus (${detectedClass})`;
-            bikeClassEl.innerText = `${detectedClass} (Confidence: ${Math.round(maxConfidence * 100)}%)`;
-            
-            // 5. Fire Trash Talk Engine
-            let category = 'low';
-            if (finalScore > 75) category = 'high';
-            else if (finalScore > 40) category = 'medium';
-
-            const phrases = trashTalkTemplates[category];
-            trashTalkEl.innerText = phrases[Math.floor(Math.random() * phrases.length)];
-
-            resultsCard.style.display = 'block';
-            statusText.innerText = 'Tap mic to test another bike!';
-            
-            // Reset state for next run
-            maxConfidence = 0;
-            detectedClass = "Unknown";
-        }
-    </script>
+      } catch (error) {
+        alert('Something went wrong: ' + error.message);
+        loader.style.display = 'none';
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
 </body>
 </html>
